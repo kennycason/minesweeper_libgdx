@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -25,6 +26,7 @@ public class MineSweeper extends ApplicationAdapter {
 	private SpriteBatch batch;
 	private ShapeRenderer shapeRenderer;
 	private BitmapFont font;
+	private Sound explosion;
 
 	private boolean[][] map;
 	private boolean[][] clicked;
@@ -48,6 +50,7 @@ public class MineSweeper extends ApplicationAdapter {
 		sorroundingMines = new int[width][height];
 		numMines = 150;
 
+		explosion = Gdx.audio.newSound(Gdx.files.internal("explosion.wav"));
 		batch = new SpriteBatch();
 		shapeRenderer = new ShapeRenderer();
 		font = new BitmapFont();
@@ -81,6 +84,7 @@ public class MineSweeper extends ApplicationAdapter {
 			if (isWin() || isLose()) {
 				gameOver = true;
 				gameOverTime = TimeUtils.millis();
+				explosion.play();
 			}
 		}
 		else {
@@ -91,7 +95,17 @@ public class MineSweeper extends ApplicationAdapter {
 		}
 	}
 
+	@Override
+	public void dispose() {
+		explosion.dispose();
+		batch.dispose();
+		shapeRenderer.dispose();
+		font.dispose();
+	}
+
 	public void handlePrimaryClick(final int mx, final int my) {
+		if (gameOver) { return; }
+
 		if (TimeUtils.timeSinceMillis(mouseLastClicked) < 150) { return; }
 		mouseLastClicked = TimeUtils.millis();
 
@@ -103,6 +117,8 @@ public class MineSweeper extends ApplicationAdapter {
 	}
 
 	public void handleSecondaryClick(final int mx, final int my) {
+		if (gameOver) { return; }
+		
 		if (TimeUtils.timeSinceMillis(mouseLastClicked) < 150) { return; }
 		mouseLastClicked = TimeUtils.millis();
 
@@ -147,9 +163,7 @@ public class MineSweeper extends ApplicationAdapter {
 		if(sorroundingMines[x][y] > 0) {
 			return;
 		}
-		if(depth > 10) {
-			//	return;
-		}
+
 		click(x - 1, y - 1, depth + 1);
 		click(x, y - 1, depth + 1);
 		click(x + 1, y - 1, depth + 1);
@@ -361,7 +375,7 @@ public class MineSweeper extends ApplicationAdapter {
 		return false;
 	}
 
-	private void printMap() {
+	private void debug() {
 		for(int y = 0; y < height; y++) {
 			for(int x = 0; x < width; x++) {
 				System.out.print(map[x][y] + ",");
