@@ -17,10 +17,9 @@ import com.badlogic.gdx.utils.TimeUtils;
 import java.util.Random;
 
 public class MineSweeper extends ApplicationAdapter {
-	public static final int WIDTH = 460;
-	public static final int HEIGHT = 350;
-
-	private final Random random = new Random();
+	public static final int WIDTH = 860;
+	public static final int HEIGHT = 650;
+	private static final Random RANDOM = new Random();
 
 	private OrthographicCamera camera;
 	private SpriteBatch batch;
@@ -28,37 +27,30 @@ public class MineSweeper extends ApplicationAdapter {
 	private BitmapFont font;
 	private Sound explosion;
 
-	private boolean[][] map;
-	private boolean[][] clicked;
-	private boolean[][] flagged;
-	private int[][] sorroundingMines;
-	private int numMines;
-	private int width;
-	private int height;
-	private int tileDim = 10;
+    private final int width = 40;
+    private final int height = 30;
+	private final boolean[][] map = new boolean[width][height];
+	private final boolean[][] clicked = new boolean[width][height];
+	private final boolean[][] flagged = new boolean[width][height];
+	private final int[][] sorroundingMines = new int[width][height];
+	private final int numMines = 125;
+	private final int tileDim = 20;
 	private long mouseLastClicked;
 	private boolean gameOver;
 	private long gameOverTime;
 
 	@Override
 	public void create () {
-		width = 40;
-		height = 30;
-		map = new boolean[width][height];
-		clicked = new boolean[width][height];
-		flagged = new boolean[width][height];
-		sorroundingMines = new int[width][height];
-		numMines = 150;
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, WIDTH, HEIGHT);
+        camera.update();
 
-		explosion = Gdx.audio.newSound(Gdx.files.internal("explosion.wav"));
-		batch = new SpriteBatch();
-		shapeRenderer = new ShapeRenderer();
-		font = new BitmapFont();
-		font.setColor(Color.WHITE);
+        batch = new SpriteBatch();
+        shapeRenderer = new ShapeRenderer();
+        font = new BitmapFont();
+        font.setColor(Color.WHITE);
 
-		camera = new OrthographicCamera();
-		camera.setToOrtho(false, WIDTH, HEIGHT);
-		camera.update();
+        explosion = Gdx.audio.newSound(Gdx.files.internal("explosion.wav"));
 
 		newMap();
 
@@ -130,7 +122,7 @@ public class MineSweeper extends ApplicationAdapter {
 	}
 
 	public void handleKeyboard() {
-		if(Gdx.input.isKeyPressed(Keys.H)) {
+		if (Gdx.input.isKeyPressed(Keys.H)) {
 			help();
 			try {
 				Thread.sleep(100);
@@ -138,29 +130,30 @@ public class MineSweeper extends ApplicationAdapter {
 				e.printStackTrace();
 			}
 		}
-		if(Gdx.input.isKeyPressed(Keys.C)) {
+		if (Gdx.input.isKeyPressed(Keys.C)) {
 			clickAll();
 		}
-		if(Gdx.input.isKeyPressed(Keys.R)) {
+		if (Gdx.input.isKeyPressed(Keys.R)) {
 			newMap();
 		}
-		if(Gdx.input.isKeyPressed(Keys.ESCAPE)) {
-			System.exit(0);
+		if (Gdx.input.isKeyPressed(Keys.ESCAPE)) {
+			//System.exit(0);
+			Gdx.app.exit();
 		}
 	}
 
 	private void click(int x, int y, int depth) {
-		if(x < 0 || x >= width || y < 0 || y >= height) {
+		if (x < 0 || x >= width || y < 0 || y >= height) {
 			return;
 		}
-		if(clicked[x][y]) {
+		if (clicked[x][y]) {
 			return;
 		}
 		clicked[x][y] = true;
-		if(map[x][y]) {
+		if (map[x][y]) {
 			return;
 		}
-		if(sorroundingMines[x][y] > 0) {
+		if (sorroundingMines[x][y] > 0) {
 			return;
 		}
 
@@ -175,10 +168,10 @@ public class MineSweeper extends ApplicationAdapter {
 	}
 
 	private void help() {
-		if(!isWin() && !isLose()) {
-			for(int y = 0; y < height; y++) {
-				for(int x = 0; x < width; x++) {
-					if(!map[x][y] && !clicked[x][y]) {
+		if (!isWin() && !isLose()) {
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					if (!map[x][y] && !clicked[x][y]) {
 						flagged[x][y] = false;
 						click(x, y, 0);
 						return;
@@ -218,12 +211,12 @@ public class MineSweeper extends ApplicationAdapter {
 
 						if (sorroundingMines[x][y] > 0) {
 							batch.begin();
-							font.getData().setScale(0.8f, 0.8f);
+							font.getData().setScale(1.2f, 1.2f);
 							font.setColor(getMineCountColor(sorroundingMines[x][y]));
 							font.draw(batch,
 									String.valueOf(sorroundingMines[x][y]),
-									x * (tileDim + 1) + 11,
-									y * (tileDim + 1) + 19);
+									x * (tileDim + 1) + 15,
+									y * (tileDim + 1) + 27);
 							batch.end();
 						}
 					}
@@ -248,11 +241,11 @@ public class MineSweeper extends ApplicationAdapter {
 		batch.begin();
 		font.setColor(Color.RED);
 
-		if(isWin()) {
+		if (isWin()) {
 			font.getData().setScale(2.0f, 2.0f);
 			font.draw(batch, "You Win", 20, 120);
 		}
-		else if(isLose()) {
+		else if (isLose()) {
 			font.getData().setScale(2.0f, 2.0f);
 			font.draw(batch, "You Lose", 20, 120);
 		}
@@ -282,8 +275,8 @@ public class MineSweeper extends ApplicationAdapter {
 	private void newMap() {
 		gameOver = false;
 
-		for(int y = 0; y < height; y++) {
-			for(int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
 				clicked[x][y] = false;
 				flagged[x][y] = false;
 				map[x][y] = false;
@@ -292,16 +285,16 @@ public class MineSweeper extends ApplicationAdapter {
 
 		int minesPlaced = 0;
 		while(minesPlaced < numMines) {
-			int x = random.nextInt(width);
-			int y = random.nextInt(height);
-			if(!map[x][y]) {
+			int x = RANDOM.nextInt(width);
+			int y = RANDOM.nextInt(height);
+			if (!map[x][y]) {
 				map[x][y] = true; // place mine
 				minesPlaced++;
 			}
 		}
 
-		for(int y = 0; y < height; y++) {
-			for(int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
 				sorroundingMines[x][y] = adjacentMines(x, y);
 			}
 		}
@@ -309,36 +302,36 @@ public class MineSweeper extends ApplicationAdapter {
 
 	private int adjacentMines(int x, int y) {
 		int tot = 0;
-		if(isMine(x - 1, y - 1)) {
+		if (isMine(x - 1, y - 1)) {
 			tot++;
 		}
-		if(isMine(x, y - 1)) {
+		if (isMine(x, y - 1)) {
 			tot++;
 		}
-		if(isMine(x + 1, y - 1)) {
+		if (isMine(x + 1, y - 1)) {
 			tot++;
 		}
-		if(isMine(x - 1, y)) {
+		if (isMine(x - 1, y)) {
 			tot++;
 		}
-		if(isMine(x + 1, y)) {
+		if (isMine(x + 1, y)) {
 			tot++;
 		}
-		if(isMine(x - 1, y + 1)) {
+		if (isMine(x - 1, y + 1)) {
 			tot++;
 		}
-		if(isMine(x, y + 1)) {
+		if (isMine(x, y + 1)) {
 			tot++;
 		}
-		if(isMine(x + 1, y + 1)) {
+		if (isMine(x + 1, y + 1)) {
 			tot++;
 		}
 		return tot;
 	}
 
 	private boolean isMine(int x, int y) {
-		if(x >= 0 && x < width && y >= 0 && y < height) {
-			if(map[x][y]) {
+		if (x >= 0 && x < width && y >= 0 && y < height) {
+			if (map[x][y]) {
 				return true;
 			}
 		}
@@ -346,8 +339,8 @@ public class MineSweeper extends ApplicationAdapter {
 	}
 
 	private void clickAll() {
-		for(int y = 0; y < height; y++) {
-			for(int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
 				clicked[x][y] = true;
 			}
 		}
@@ -355,8 +348,8 @@ public class MineSweeper extends ApplicationAdapter {
 
 	private boolean isWin() {
 		boolean win = true;
-		for(int y = 0; y < height; y++) {
-			for(int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
 				win &= ((clicked[x][y] && !map[x][y]) ||
 						(!clicked[x][y] && map[x][y]));
 			}
@@ -365,9 +358,9 @@ public class MineSweeper extends ApplicationAdapter {
 	}
 
 	private boolean isLose() {
-		for(int y = 0; y < height; y++) {
-			for(int x = 0; x < width; x++) {
-				if(clicked[x][y] && map[x][y]) {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				if (clicked[x][y] && map[x][y]) {
 					return true;
 				}
 			}
@@ -376,8 +369,8 @@ public class MineSweeper extends ApplicationAdapter {
 	}
 
 	private void debug() {
-		for(int y = 0; y < height; y++) {
-			for(int x = 0; x < width; x++) {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
 				System.out.print(map[x][y] + ",");
 			}
 			System.out.println();

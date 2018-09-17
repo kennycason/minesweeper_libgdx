@@ -9,11 +9,12 @@ public class HtmlLauncher extends GwtApplication {
 
         @Override
         public GwtApplicationConfiguration getConfig () {
-                return new GwtApplicationConfiguration(480, 320);
+                return new GwtApplicationConfiguration(MineSweeper.WIDTH, MineSweeper.HEIGHT);
         }
 
         @Override
-        public ApplicationListener getApplicationListener () {
+        public ApplicationListener createApplicationListener() {
                 return new MineSweeper();
         }
+
 }
