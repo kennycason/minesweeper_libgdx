@@ -4,7 +4,7 @@ Mine Sweeper
 A Mine Sweeper implementation using LibGDX.
 
 ## Controls
-
+| Control            | Description              |
 | ------------------ | ------------------------ |
 | Single Click       | Uncover tile             |
 | Left + Right Click | Flag tile as safe        |
